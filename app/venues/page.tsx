@@ -1,22 +1,22 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
-
-async function getVenues() {
-  const { data: venues } = await supabase
-    .from('venues')
-    .select('*')
-    .eq('status', 'active')
-    .order('name');
-  
-  return venues || [];
-}
-
 export default async function VenuesPage() {
-  const venues = await getVenues();
+  // Create Supabase client inside the component
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  
+  let venues = [];
+  
+  if (supabaseUrl && supabaseKey) {
+    const supabase = createClient(supabaseUrl, supabaseKey);
+    const { data } = await supabase
+      .from('venues')
+      .select('*')
+      .eq('status', 'active')
+      .order('name');
+    
+    venues = data || [];
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -32,7 +32,7 @@ export default async function VenuesPage() {
         <h1 className="text-4xl font-bold text-gray-900 mb-8">Browse Venues</h1>
         
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {venues.map((venue) => (
+          {venues.map((venue: any) => (
             <div key={venue.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition">
               <div className="p-6">
                 <h2 className="text-xl font-bold text-gray-900 mb-2">{venue.name}</h2>
